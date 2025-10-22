@@ -15,14 +15,15 @@ The dashboard helps business users and managers identify which car brands and mo
 
 ---
 
-## 🧰 Tech Stack
-| Tool | Purpose |
-|------|----------|
-| **Power BI Desktop** | Data modeling, dashboard creation |
-| **Excel / CSV** | Data source & cleanup |
-| **Power Query Editor** | ETL: transform, clean, and combine tables |
-| **DAX (Data Analysis Expressions)** | Calculated columns and measures |
-| **Excel / Python (optional)** | Data pre-processing and exploration |
+| Tool                                | Purpose                                                |
+| ----------------------------------- | ------------------------------------------------------ |
+| **Power BI Desktop**                | Data modeling, dashboard creation                      |
+| **Excel / CSV**                     | Data source & cleanup                                  |
+| **Power Query Editor**              | ETL: transform, clean, and combine tables              |
+| **DAX (Data Analysis Expressions)** | Calculated columns and measures                        |
+| **SQL**                             | Querying, joining, and aggregating data from databases |
+| **Excel / Python (optional)**       | Data pre-processing and exploration                    |
+
 
 ---
 
