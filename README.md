@@ -28,7 +28,7 @@ The dashboard helps business users and managers identify which car brands and mo
 ---
 
 ## 📂 Dataset
-The dataset contains ~10,000 car sales records with columns such as:
+The dataset contains ~1,000,000 car sales records with columns such as:
 
 - `Car Make`, `Car Model`, `Car Year`
 - `Sale Price`, `Cost`, `Profit`, `Discount`
@@ -36,13 +36,10 @@ The dataset contains ~10,000 car sales records with columns such as:
 - `Sales Region`, `Season`, `Date`  
 ---
 🚀 Top Insights — Car Sales Analytics 
-1. Mercedes, BMW, and Audi generated over 55 % of total profit, confirming that luxury brands are the main profit drivers despite lower sales volume.
-2 .Average profit margin reached ~20 %, with luxury vehicles achieving up to 24–25 %.
+1. Mercedes, BMW, and Audi generated over 55 % of total profit, confirming that luxury brands are the main profit drivers.
+2. Average profit margin reached ~30 %, with luxury vehicles achieving up to 35 %.
 3. Millennials and Gen X accounted for > 60 % of total sales, representing the core target audience for the automotive market.
-4 .Moderate discounts (5–10 %) optimized sales volume without significantly reducing margins, revealing an effective pricing strategy.
-5. Coastal states (California, Florida, Texas, New York) consistently outperformed other regions in both total sales and profitability.
-6 .Average car price increased ~7 % from 2018 to 2024, indicating a market shift toward newer and higher-priced vehicles.
-7. Male–female customer ratio remained balanced (~51 % male / 49 % female), showing strong overall gender diversity in the customer base.
-8 .New cars (0–2 years old) dominated total sales, highlighting customer preference for recent models with higher resale and reliability value.
-9. Data visualization identified key patterns between price tiers, discount levels, and profitability, guiding data-driven inventory and marketing decisions.
+4. Male–female customer ratio remained balanced (~51 % male / 49 % female), showing strong overall gender diversity in the customer base.
+5 .New cars (0–2 years old) dominated total sales, highlighting customer preference for recent models with higher resale and reliability value.
+6. Data visualization identified key patterns between price tiers, discount levels, and profitability, guiding data-driven inventory and marketing decisions.
 
