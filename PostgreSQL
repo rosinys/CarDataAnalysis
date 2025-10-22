@@ -1,0 +1,259 @@
+car-sales-sql-project/
+│
+├── README.md
+└── queries/
+    ├── create_car_sales_table.sql
+    ├── customer_generation.sql
+    └── top_brand_by_generation.sql
+    └── top_model_by_region.sql
+    └── brand_segmentation.sql
+    └── car_model_performance_quartiles.sql
+    └──queries/create_car_sales_table.sql
+
+queries/create_car_sales_table.sql
+-- =============================================
+-- 🏗️ Create Table: car_sales
+-- =============================================
+-- This script defines the structure of the car_sales table.
+-- It includes customer details, vehicle info, pricing, and derived features like sale year, quarter, and car age.
+-- Key Steps:
+-- 1️⃣ Column Definitions: Each field is defined with an appropriate data type to
+-- 2️⃣ Data Types:
+-- =============================================
+
+CREATE TABLE car_sales (
+  date DATE,
+  salesperson TEXT,
+  customer_name TEXT,
+  customer_age SMALLINT,
+  customer_gender TEXT,
+  car_make TEXT,
+  car_model TEXT,
+  car_year SMALLINT,
+  quantity SMALLINT,
+  sale_price NUMERIC(10,2),
+  cost NUMERIC(10,2),
+  profit NUMERIC(10,2),
+  discount NUMERIC(5,2),
+  payment_method TEXT,
+  commission_rate NUMERIC(5,2),
+  commission_earned NUMERIC(10,2),
+  sales_region TEXT,
+  season TEXT,
+  sale_year SMALLINT,
+  sale_month SMALLINT,
+  sale_quarter SMALLINT,
+  day_of_week TEXT,
+  day_of_week_num SMALLINT,
+  season_num SMALLINT,
+  total_tag_price NUMERIC(10,2),
+  car_tag_price NUMERIC(10,2),
+  dealer_price NUMERIC(10,2),
+  profit_per_car NUMERIC(10,2),
+  profit_margin_per_Car NUMERIC(5,2),
+  car_age SMALLINT,
+  early_release_purchase BOOLEAN
+);
+
+
+queries/customer_generation.sql
+-- =============================================
+-- 🎯 Categorize Customers by Generation
+-- =============================================
+-- This query assigns each customer to a generation based on their age, enabling demographic analysis.
+-- We used CASE statement because it allows us to create new categories or values based on conditions.
+-- 1️⃣ DISTINCT Selection: Ensures each age appears only once.
+-- 2️⃣ CASE Statement: Maps ages to generations:
+-- - Gen Z: 12–27
+-- - Millennial: 28–43
+-- - Gen X: 44–59
+-- - Baby Boomer: 60–78
+-- - Silent: 79+
+-- - Unknown: Ages outside these ranges
+-- 3️⃣ ORDER BY: Sorts the results by age for easier readability.
+-- =============================================
+
+SELECT
+    DISTINCT customer_age,
+    CASE
+        WHEN customer_age BETWEEN 12 AND 27 THEN 'Gen Z'
+        WHEN customer_age BETWEEN 28 AND 43 THEN 'Millennial'
+        WHEN customer_age BETWEEN 44 AND 59 THEN 'Gen X'
+        WHEN customer_age BETWEEN 60 AND 78 THEN 'Baby Boomer'
+        WHEN customer_age >= 79 THEN 'Silent'
+        ELSE 'Unknown'
+    END AS generation
+FROM car_sales
+ORDER BY customer_age;
+
+
+queries/top_brand_by_generation.sql
+-- =============================================
+-- 🚗 Top Car Brand by Generation, Gender, and Year
+-- =============================================
+-- This query finds the most popular car brand for generation and gender in every sales year.
+-- We used CTE to simply queries by breaking them into logical steps.
+-- We also included Window Function to assking ranking to each brand in its group to enable choose the top model.
+-- Key Steps:
+-- 1️⃣ generation_sales CTE:
+-- - Categorizes customers into generations based on age:
+-- - Gen Z: 12–27
+-- - Millennial: 28–43
+-- - Gen X: 44–59
+-- - Baby Boomer: 60–78
+-- - Silent: 79+
+-- - Unknown: Any age outside these ranges
+-- - Aggregates total cars sold per year, brand, gender, and generation.
+-- 2️⃣ ranked CTE:
+-- - Uses RANK() with PARTITION BY sale_year, generation, customer_gender to rank car brands within each group based on total sales.
+-- 3️⃣ WHERE rank = 1:
+-- - Filters for the top-ranked brand (rank = 1) in each generation-gender-year combination.
+-- - Orders results by year, generation, and gender for clarity.
+-- =============================================
+
+WITH generation_sales AS (
+    SELECT
+        sale_year,
+        car_make,
+        customer_gender,
+        CASE
+            WHEN customer_age BETWEEN 12 AND 27 THEN 'Gen Z'
+            WHEN customer_age BETWEEN 28 AND 43 THEN 'Millennial'
+            WHEN customer_age BETWEEN 44 AND 59 THEN 'Gen X'
+            WHEN customer_age BETWEEN 60 AND 78 THEN 'Baby Boomer'
+            WHEN customer_age >= 79 THEN 'Silent'
+            ELSE 'Unknown'
+        END AS generation,
+        SUM(quantity) AS total_cars_sold
+    FROM car_sales
+    GROUP BY
+        sale_year,
+        car_make,
+        customer_gender,
+        generation
+),
+ranked AS (
+    SELECT
+        *,
+        RANK() OVER (
+            PARTITION BY sale_year, generation, customer_gender
+            ORDER BY total_cars_sold DESC
+        ) AS rank
+    FROM generation_sales
+)
+SELECT
+    sale_year,
+    generation,
+    customer_gender,
+    car_make,
+    total_cars_sold
+FROM ranked
+WHERE rank = 1
+ORDER BY
+    sale_year,
+    generation,
+    customer_gender;
+
+
+queries/top_model_by_region.sql
+-- =============================================
+-- 🌎 Top-Selling Car Model by Sales Region
+-- =============================================
+-- This query identifies the most popular car model in each state based on total cars sold.
+-- It uses a window function to determine the highest-selling model per region.
+-- Key Steps:
+-- 1️⃣ Aggregation: Calculates total cars sold (SUM(quantity)) per region, make, and model.
+-- 2️⃣ RANK() Window Function: Ranks models within each region based on total sales in descending order.
+-- 3️⃣ Filtering Top Model: Uses WHERE ranked = 1 to select only the highest-selling model per region.
+-- =============================================
+
+SELECT 
+    r.sales_region, 
+    r.car_make, 
+    r.car_model, 
+    r.total_cars_sold
+FROM (
+    SELECT
+        sales_region,
+        car_make,
+        car_model,
+        SUM(quantity) AS total_cars_sold,
+        RANK() OVER (
+            PARTITION BY sales_region 
+            ORDER BY SUM(quantity) DESC
+        ) AS ranked
+    FROM car_sales
+    GROUP BY 
+        sales_region, 
+        car_make, 
+        car_model
+) r
+WHERE r.ranked = 1
+ORDER BY r.sales_region;
+
+
+queries/brand_segmentation.sql
+-- =============================================
+-- 🏷️ Car Brand Segmentation
+-- =============================================
+-- This query categorizes each unique car brand into market segments
+-- This allows easy analysis of sales, profits, or trends by market segment.
+-- Key Steps:
+-- 1️⃣ DISTINCT Selection: Ensures each car brand appears only once.
+-- 2️⃣ CASE Statement: Maps each brand to a segment:
+-- - Luxury: Premium brands such as Audi, BMW, Mercedes
+-- - Mid-Tier: Popular mainstream brands such as Honda, Hyundai, Kia, Toyota
+-- - Value: Budget-friendly brands such as Chevrolet, Ford, Nissan
+-- =============================================
+
+SELECT
+    DISTINCT car_make,  -- List each unique car brand
+    CASE
+        WHEN car_make IN ('Audi', 'BMW', 'Mercedes') THEN 'Luxury'
+        WHEN car_make IN ('Honda', 'Hyundai', 'Kia', 'Toyota') THEN 'Mid-Tier'
+        WHEN car_make IN ('Chevrolet', 'Ford', 'Nissan') THEN 'Value'
+    END AS brand_segment
+FROM car_sales
+
+
+queries/car_model_performance_quartiles.sql
+- =============================================
+-- 🚗 Car Model Performance Segmentation (Quartiles)
+-- =============================================
+-- Segments car models based on total quantity sold into quartiles: lower 25%, middle 50%, and upper 25%.
+-- This helps identify Top, Mid, and Low performing models based on sales.
+-- Key Steps:
+-- 1️⃣ CTE - breaks the query into logical steps.
+-- 2️⃣ NTILE(4) Window Function - divides models into 4 equal groups (quartiles, each 25%).
+-- 3️⃣ CASE Statement - maps the quartiles to segments.
+-- =============================================
+
+WITH model_sales AS (
+    SELECT
+        car_model,
+        car_make,
+        car_year,
+        SUM(quantity) AS total_quantity
+    FROM car_sales
+    GROUP BY car_model, car_make, car_year
+),
+
+ranked_models AS (
+    SELECT
+        *,
+        NTILE(4) OVER (ORDER BY total_quantity) AS quartile  -- divides models into 4 equal groups (25% each)
+    FROM model_sales
+)
+
+SELECT
+    car_model,
+    car_make,
+    car_year,
+    total_quantity,
+    CASE
+        WHEN quartile = 4 THEN 'Top Performer'        -- upper 25%
+        WHEN quartile = 2 OR quartile = 3 THEN 'Mid Performer'  -- middle 50%
+        WHEN quartile = 1 THEN 'Low Performer'       -- lower 25%
+    END AS quantity_segment
+FROM ranked_models
+ORDER BY car_year, car_make, total_quantity DESC;
