@@ -1,4 +1,4 @@
-# 🏎️ Car Sales Analytics Dashboard — Power BI & Data Analysis
+# 🚗 Car Sales Analytics Dashboard — Power BI & Data Analysis
 
 ## 📖 Overview
 This project analyzes national car-sales data using **Power BI** to uncover insights about **profitability, discounts, customer demographics, and regional performance**.  
